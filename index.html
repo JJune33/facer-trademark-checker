@@ -58,7 +58,8 @@
       resultBox.className = "result";
 
       try {
-        const res = await fetch("https://fbab31aa-b36a-41ba-8850-770c8930a4f3-00-1mo3mq37ruv22.picard.replit.dev/list");
+        const res = await fetch("https://facer-checker-proxy.onrender.com/list")
+;
         const trademarks = await res.json();
         const words = input.split(/[^a-zA-Z0-9\-]+/);
         const flagged = trademarks.filter(t => words.includes(t.toLowerCase()));
