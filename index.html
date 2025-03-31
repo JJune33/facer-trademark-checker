@@ -12,11 +12,32 @@
       padding: 1rem;
       background: #f8f8f8;
     }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    h1 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+    .icon-button {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 5px;
+      color: #555;
+    }
+    .icon-button:hover {
+      color: #000;
+    }
     textarea {
       width: 100%;
       height: 150px;
       font-size: 1rem;
       padding: 10px;
+      margin-top: 1rem;
     }
     button {
       padding: 10px 20px;
@@ -61,11 +82,14 @@
   </style>
 </head>
 <body>
-  <h1>Facer Trademark Checker</h1>
+  <header>
+    <h1>Facer Trademark Checker</h1>
+    <button class="icon-button" onclick="toggleList()" title="Show trademark word list">📄</button>
+  </header>
+
   <p>Paste your description below:</p>
   <textarea id="inputText" placeholder="e.g. Inspired by Rolex, Seiko, and others..."></textarea>
   <button onclick="checkTrademarks()">Check for trademarks</button>
-  <button onclick="toggleList()">Show trademark word list</button>
   <div id="result" class="result"></div>
   <div id="wordListContainer">
     <h3>Trademark word list</h3>
@@ -80,6 +104,7 @@
       const response = await fetch(CSV_URL);
       const csv = await response.text();
       cachedWords = csv.split(/\r?\n/).map(t => t.trim().toLowerCase()).filter(t => t);
+      cachedWords.sort();
     }
 
     async function checkTrademarks() {
