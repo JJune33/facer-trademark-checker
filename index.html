@@ -54,7 +54,7 @@
       resultBox.className = "result";
 
       try {
-        const response = await fetch("trademarks.json");
+        const response = await fetch("https://script.google.com/macros/s/AKfycbyAwaP1fjpp5EBq_yolso4Lr5fVu7oIQLcusnQi76WchuozVMdKKuU_pBj2qW4tVCXmiw/exec");
         const trademarks = await response.json();
 
         const words = input.split(/[^a-zA-Z0-9\-]+/);
