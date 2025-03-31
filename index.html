@@ -8,74 +8,67 @@
     body {
       font-family: sans-serif;
       max-width: 800px;
-      margin: 3rem auto;
+      margin: 2rem auto;
       padding: 1rem;
       background: #f8f8f8;
     }
     textarea {
       width: 100%;
-      height: 140px;
+      height: 150px;
       font-size: 1rem;
       padding: 10px;
-      margin-bottom: 1rem;
     }
     button {
       padding: 10px 20px;
+      margin-top: 1rem;
       font-size: 1rem;
-      background-color: #e8f0fe;
-      border: none;
-      border-radius: 10px;
       cursor: pointer;
     }
     .result {
       margin-top: 1rem;
       padding: 1rem;
-      border-radius: 8px;
+      border-radius: 5px;
     }
     .ok {
-      background: #d1fae5;
+      background-color: #e0fce0;
       color: #065f46;
     }
     .warn {
-      background: #fef3c7;
-      color: #92400e;
-      font-style: italic;
+      background-color: #fff3cd;
+      color: #856404;
     }
   </style>
 </head>
 <body>
   <h1>Facer Trademark Checker</h1>
-  <p>Paste your watch face title or description below:</p>
-  <textarea id="inputText" placeholder="Paste your text here..."></textarea>
-  <button onclick="checkText()">Check for trademarks</button>
+  <p>Paste your description below:</p>
+  <textarea id="inputText" placeholder="e.g. Inspired by Rolex, Seiko, and others..."></textarea>
+  <button onclick="checkTrademarks()">Check for trademarks</button>
   <div id="result" class="result"></div>
 
   <script>
-    async function checkText() {
+    async function checkTrademarks() {
       const input = document.getElementById("inputText").value.toLowerCase();
       const resultBox = document.getElementById("result");
-      resultBox.innerHTML = "⏳ Checking, please wait...";
+      resultBox.innerHTML = "Checking...";
       resultBox.className = "result";
 
       try {
-        const res = await fetch("https://facer-checker-proxy.onrender.com/list")
-;
-        const trademarks = await res.json();
-        const words = input.split(/[^a-zA-Z0-9\-]+/);
-        const flagged = trademarks.filter(t => words.includes(t.toLowerCase()));
+        const response = await fetch("trademarks.json");
+        const trademarks = await response.json();
 
-        if (flagged.length > 0) {
+        const words = input.split(/[^a-zA-Z0-9\-]+/);
+        const matched = trademarks.filter(t => words.includes(t.toLowerCase()));
+
+        if (matched.length > 0) {
           resultBox.classList.add("warn");
-          resultBox.innerHTML = `
-            ⚠️ <strong>Caution:</strong> The following terms may be trademarked and could trigger a takedown:<br><br>
-            <em>${flagged.join(", ")}</em>
-          `;
+          resultBox.innerHTML = `⚠️ <strong>Warning:</strong> Potential trademarked terms found:<br><em>${matched.join(", ")}</em>`;
         } else {
           resultBox.classList.add("ok");
           resultBox.innerHTML = "✅ No known trademark issues found.";
         }
       } catch (err) {
-        resultBox.innerHTML = "❌ Error checking trademarks.";
+        resultBox.innerHTML = "❌ Error loading trademark list.";
         console.error(err);
       }
     }
