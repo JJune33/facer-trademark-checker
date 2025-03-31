@@ -37,6 +37,27 @@
       background-color: #fff3cd;
       color: #856404;
     }
+    #wordListContainer {
+      margin-top: 2rem;
+      display: none;
+    }
+    #wordList {
+      max-height: 300px;
+      overflow-y: auto;
+      padding: 1rem;
+      background: #ffffff;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .badge {
+      background-color: #e2e8f0;
+      padding: 6px 10px;
+      border-radius: 15px;
+      font-size: 0.9rem;
+    }
   </style>
 </head>
 <body>
@@ -44,9 +65,23 @@
   <p>Paste your description below:</p>
   <textarea id="inputText" placeholder="e.g. Inspired by Rolex, Seiko, and others..."></textarea>
   <button onclick="checkTrademarks()">Check for trademarks</button>
+  <button onclick="toggleList()">Show trademark word list</button>
   <div id="result" class="result"></div>
+  <div id="wordListContainer">
+    <h3>Trademark word list</h3>
+    <div id="wordList"></div>
+  </div>
 
   <script>
+    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQdhyTC2yiHRDg9NEhk22h0CG82nRO8osF6JsR1KSVWzlLGNHLKBJOw1jIEmu5IkabEV1O8IobLL5ey/pub?output=csv";
+    let cachedWords = [];
+
+    async function fetchWords() {
+      const response = await fetch(CSV_URL);
+      const csv = await response.text();
+      cachedWords = csv.split(/\r?\n/).map(t => t.trim().toLowerCase()).filter(t => t);
+    }
+
     async function checkTrademarks() {
       const input = document.getElementById("inputText").value.toLowerCase();
       const resultBox = document.getElementById("result");
@@ -54,12 +89,9 @@
       resultBox.className = "result";
 
       try {
-        const response = await fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vQdhyTC2yiHRDg9NEhk22h0CG82nRO8osF6JsR1KSVWzlLGNHLKBJOw1jIEmu5IkabEV1O8IobLL5ey/pub?output=csv");
-        const csv = await response.text();
-        const trademarks = csv.split(/\r?\n/).map(t => t.trim().toLowerCase()).filter(t => t);
-
+        if (cachedWords.length === 0) await fetchWords();
         const words = input.split(/[^a-zA-Z0-9\-]+/);
-        const matched = trademarks.filter(t => words.includes(t));
+        const matched = cachedWords.filter(t => words.includes(t));
 
         if (matched.length > 0) {
           resultBox.classList.add("warn");
@@ -71,6 +103,24 @@
       } catch (err) {
         resultBox.innerHTML = "❌ Error loading trademark list.";
         console.error(err);
+      }
+    }
+
+    async function toggleList() {
+      const container = document.getElementById("wordListContainer");
+      const list = document.getElementById("wordList");
+      if (container.style.display === "none") {
+        if (cachedWords.length === 0) await fetchWords();
+        list.innerHTML = "";
+        cachedWords.forEach(word => {
+          const span = document.createElement("span");
+          span.className = "badge";
+          span.textContent = word;
+          list.appendChild(span);
+        });
+        container.style.display = "block";
+      } else {
+        container.style.display = "none";
       }
     }
   </script>
