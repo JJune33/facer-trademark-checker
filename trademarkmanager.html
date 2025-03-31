@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trademark Manager</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background: #f0f0f0;
+    }
+    textarea {
+      width: 100%;
+      height: 300px;
+      font-family: monospace;
+      font-size: 1rem;
+      padding: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      margin-top: 1rem;
+    }
+    #output {
+      margin-top: 2rem;
+      background: #fff;
+      padding: 1rem;
+      border-radius: 5px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>Trademark Manager</h1>
+  <p>Enter words below, one per line:</p>
+  <textarea id="input"></textarea>
+  <br>
+  <button onclick="genereerJSON()">Generate JSON</button>
+
+  <div id="output"></div>
+
+  <script>
+    const wachtwoord = "facersecret";
+    const invoer = prompt("Enter password:");
+    if (invoer !== wachtwoord) {
+      document.body.innerHTML = "<h2>Access denied.</h2>";
+    }
+
+    function genereerJSON() {
+      const tekst = document.getElementById("input").value;
+      const regels = tekst.split(/\n+/).map(r => r.trim().toLowerCase()).filter(r => r);
+      const json = JSON.stringify(regels, null, 2);
+      document.getElementById("output").innerText = json;
+    }
+  </script>
+</body>
+</html>
