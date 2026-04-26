@@ -47,6 +47,11 @@
       letter-spacing: .4px;
     }
 
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
     main {
       max-width: 900px;
       margin: 0 auto;
@@ -114,8 +119,13 @@
     }
 
     .icon-button {
-      font-size: 1.3rem;
-      padding: 8px 12px;
+      width: 44px;
+      height: 44px;
+      padding: 0;
+      display: grid;
+      place-items: center;
+      font-size: 1.25rem;
+      font-weight: 800;
     }
 
     .loader-box {
@@ -200,12 +210,87 @@
       border-radius: 999px;
       font-size: 0.9rem;
     }
+
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: #0009;
+      backdrop-filter: blur(6px);
+      z-index: 20;
+      padding: 18px;
+    }
+
+    .modal-backdrop.show {
+      display: grid;
+      place-items: center;
+    }
+
+    .modal {
+      width: min(520px, 100%);
+      border: 1px solid #343b4d;
+      border-radius: 22px;
+      background: #202532;
+      color: #eee;
+      box-shadow:
+        0 22px 60px #000b,
+        inset 0 1px 0 #ffffff12;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 18px;
+      border-bottom: 1px solid #343b4d;
+      background: #252b3a;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      color: #9fd7ff;
+      font-size: 1.1rem;
+    }
+
+    .modal-body {
+      padding: 18px;
+      line-height: 1.6;
+      color: #c8cfdd;
+    }
+
+    .modal-body strong {
+      color: #fff8d6;
+    }
+
+    .modal-body .contact {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: #11141c;
+      border: 1px solid #343b4d;
+      color: #dce8f8;
+    }
+
+    .close-button {
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      display: grid;
+      place-items: center;
+      font-size: 1.25rem;
+    }
   </style>
 </head>
 <body>
   <header>
     <h1>✦ Facer Trademark Checker</h1>
-    <button id="listButton" class="icon-button" onclick="toggleList()" title="Show trademark word list">📄</button>
+
+    <div class="header-actions">
+      <button class="icon-button" onclick="openInfo()" title="About this page">?</button>
+      <button id="listButton" class="icon-button" onclick="toggleList()" title="Show trademark word list">📄</button>
+    </div>
   </header>
 
   <main>
@@ -228,6 +313,31 @@
     </div>
   </main>
 
+  <div id="infoModal" class="modal-backdrop" onclick="closeInfo(event)">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
+      <div class="modal-header">
+        <h2 id="infoTitle">About this checker</h2>
+        <button class="close-button" onclick="closeInfo()" title="Close">×</button>
+      </div>
+
+      <div class="modal-body">
+        <p>
+          This page helps you check a Facer watch face description for words that may be trademarked.
+          It compares your text with a word list loaded from Google Sheets.
+        </p>
+
+        <p>
+          The checker is only a helpful tool and does not replace your own review.
+          Always make sure your final description follows Facer guidelines.
+        </p>
+
+        <div class="contact">
+          Questions or suggestions? Contact me on Facer: <strong>Jives</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQdhyTC2yiHRDg9NEhk22h0CG82nRO8osF6JsR1KSVWzlLGNHLKBJOw1jIEmu5IkabEV1O8IobLL5ey/pub?output=csv";
     let cachedWords = [];
@@ -249,6 +359,22 @@
       document.getElementById("loader").style.display = "none";
       document.getElementById("listButton").disabled = false;
     }
+
+    function openInfo() {
+      document.getElementById("infoModal").classList.add("show");
+    }
+
+    function closeInfo(event) {
+      if (!event || event.target.id === "infoModal" || event.target.classList.contains("close-button")) {
+        document.getElementById("infoModal").classList.remove("show");
+      }
+    }
+
+    document.addEventListener("keydown", function(event) {
+      if (event.key === "Escape") {
+        document.getElementById("infoModal").classList.remove("show");
+      }
+    });
 
     async function checkTrademarks() {
       const input = document.getElementById("inputText").value.toLowerCase();
