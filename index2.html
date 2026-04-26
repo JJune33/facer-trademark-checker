@@ -96,7 +96,7 @@
         inset 0 1px 0 #ffffff12;
     }
 
-    button:hover {
+    button:hover:not(:disabled) {
       background: #343b4d;
       color: #9fd7ff;
       box-shadow:
@@ -104,13 +104,47 @@
         0 0 12px #70c7ff22;
     }
 
-    button:active {
+    button:active:not(:disabled) {
       transform: translateY(1px);
+    }
+
+    button:disabled {
+      opacity: .55;
+      cursor: wait;
     }
 
     .icon-button {
       font-size: 1.3rem;
       padding: 8px 12px;
+    }
+
+    .loader-box {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      margin-top: 1rem;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid #343b4d;
+      background: #202532;
+      color: #aeb6c7;
+      box-shadow: 0 8px 20px #0006;
+    }
+
+    .loader-spinner {
+      width: 22px;
+      height: 22px;
+      border: 3px solid #3d4558;
+      border-top-color: #6ebfff;
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+      flex: 0 0 auto;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
     }
 
     .result {
@@ -171,13 +205,20 @@
 <body>
   <header>
     <h1>✦ Facer Trademark Checker</h1>
-    <button class="icon-button" onclick="toggleList()" title="Show trademark word list">📄</button>
+    <button id="listButton" class="icon-button" onclick="toggleList()" title="Show trademark word list">📄</button>
   </header>
 
   <main>
     <p>Paste your description below:</p>
+
     <textarea id="inputText" placeholder="e.g. Inspired by Rolex, Seiko, and others..."></textarea>
+
     <button onclick="checkTrademarks()">Check for trademarks</button>
+
+    <div id="loader" class="loader-box">
+      <div class="loader-spinner"></div>
+      <span>Loading trademark word list...</span>
+    </div>
 
     <div id="result" class="result"></div>
 
@@ -190,6 +231,7 @@
   <script>
     const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQdhyTC2yiHRDg9NEhk22h0CG82nRO8osF6JsR1KSVWzlLGNHLKBJOw1jIEmu5IkabEV1O8IobLL5ey/pub?output=csv";
     let cachedWords = [];
+    let isLoading = false;
 
     async function fetchWords() {
       const response = await fetch(CSV_URL);
@@ -198,14 +240,30 @@
       cachedWords.sort();
     }
 
+    function showLoader() {
+      document.getElementById("loader").style.display = "flex";
+      document.getElementById("listButton").disabled = true;
+    }
+
+    function hideLoader() {
+      document.getElementById("loader").style.display = "none";
+      document.getElementById("listButton").disabled = false;
+    }
+
     async function checkTrademarks() {
       const input = document.getElementById("inputText").value.toLowerCase();
       const resultBox = document.getElementById("result");
+
       resultBox.innerHTML = "Checking...";
       resultBox.className = "result";
 
       try {
-        if (cachedWords.length === 0) await fetchWords();
+        if (cachedWords.length === 0) {
+          showLoader();
+          await fetchWords();
+          hideLoader();
+        }
+
         const words = input.split(/[^a-zA-Z0-9\-]+/);
         const matched = cachedWords.filter(t => words.includes(t));
 
@@ -217,27 +275,44 @@
           resultBox.innerHTML = "✅ No known trademark issues found.";
         }
       } catch (err) {
+        hideLoader();
         resultBox.innerHTML = "❌ Error loading trademark list.";
         console.error(err);
       }
     }
 
     async function toggleList() {
+      if (isLoading) return;
+
       const container = document.getElementById("wordListContainer");
       const list = document.getElementById("wordList");
 
-      if (container.style.display === "none") {
-        if (cachedWords.length === 0) await fetchWords();
-        list.innerHTML = "";
+      if (container.style.display === "none" || container.style.display === "") {
+        try {
+          isLoading = true;
+          showLoader();
 
-        cachedWords.forEach(word => {
-          const span = document.createElement("span");
-          span.className = "badge";
-          span.textContent = word;
-          list.appendChild(span);
-        });
+          if (cachedWords.length === 0) {
+            await fetchWords();
+          }
 
-        container.style.display = "block";
+          list.innerHTML = "";
+
+          cachedWords.forEach(word => {
+            const span = document.createElement("span");
+            span.className = "badge";
+            span.textContent = word;
+            list.appendChild(span);
+          });
+
+          container.style.display = "block";
+        } catch (err) {
+          alert("Error loading trademark list.");
+          console.error(err);
+        } finally {
+          isLoading = false;
+          hideLoader();
+        }
       } else {
         container.style.display = "none";
       }
