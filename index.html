@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Facer Trademark Checker</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #27231f;
+      color: #ead9c0;
+      font-family: system-ui, sans-serif;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at 50% -15%, #6b5a45 0, #3a322b 25%, transparent 48%),
+        radial-gradient(circle at 10% 75%, #6a4a23aa 0, transparent 32%),
+        radial-gradient(circle at 90% 80%, #1d1a18 0, transparent 34%),
+        linear-gradient(135deg, #2d2924 0, #1e1b18 48%, #151311 100%);
+      z-index: -3;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        repeating-linear-gradient(45deg, rgba(255, 255, 255, .022) 0, rgba(255, 255, 255, .022) 1px, transparent 1px, transparent 4px),
+        repeating-linear-gradient(-45deg, rgba(0, 0, 0, .18) 0, rgba(0, 0, 0, .18) 1px, transparent 1px, transparent 5px);
+      pointer-events: none;
+      z-index: -2;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      min-height: 68px;
+      padding: 11px 14px;
+      background: linear-gradient(180deg, #4b433b 0, #2d2925 48%, #171513 100%);
+      border-bottom: 1px solid #0d0c0b;
+      box-shadow:
+        0 1px 0 #7b6c5b inset,
+        0 -1px 0 #0a0908 inset,
+        0 8px 26px #000b;
+      z-index: 2;
+    }
+
+    h1 {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      font-size: 18px;
+      font-weight: 950;
+      color: #f6b31d;
+      letter-spacing: .8px;
+      text-shadow: 0 1px 0 #000, 0 0 10px #f4a00077;
+    }
+
+    .logo-icon {
+      width: 30px;
+      height: 30px;
+      color: #f6b31d;
+      filter: drop-shadow(0 1px 0 #000) drop-shadow(0 0 9px #f6b31d);
+      flex: 0 0 auto;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 26px 16px 44px;
+    }
+
+    p {
+      color: #d5c2a7;
+      text-shadow: 0 1px 0 #000;
+    }
+
+    textarea {
+      width: 100%;
+      height: 180px;
+      resize: vertical;
+      border: 1px solid #100f0d;
+      border-radius: 12px;
+      padding: 22px;
+      background: linear-gradient(180deg, rgba(66, 59, 52, .96), rgba(37, 33, 29, .98));
+      color: #ead9c0;
+      font: 16px/1.6 ui-monospace, SFMono-Regular, Consolas, monospace;
+      outline: 0;
+      box-shadow:
+        0 1px 0 #7b6f60 inset,
+        0 -1px 0 #111 inset,
+        0 0 0 1px #0008,
+        0 14px 35px #0009,
+        inset 0 0 38px #0008;
+      caret-color: #f6b31d;
+      text-shadow: 0 1px 0 #000;
+    }
+
+    textarea::selection {
+      background: #d89217aa;
+      color: #fff4d8;
+    }
+
+    textarea:focus {
+      border-color: #f0a914;
+      box-shadow:
+        0 1px 0 #8d7c66 inset,
+        0 -1px 0 #111 inset,
+        0 0 0 1px #000,
+        0 0 0 3px #f0a91426,
+        0 0 22px #f0a91444,
+        inset 0 0 42px #0009;
+    }
+
+    textarea::placeholder {
+      color: #b8a386;
+    }
+
+    button {
+      background: linear-gradient(180deg, #5b5148 0, #3a342f 48%, #1f1c19 100%);
+      border: 1px solid #11100f;
+      color: #f1dfc4;
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .45px;
+      text-transform: uppercase;
+      box-shadow:
+        0 1px 0 #8a7b69 inset,
+        0 -1px 0 #0d0c0b inset,
+        0 1px 0 #000,
+        0 7px 14px #0008;
+      user-select: none;
+      line-height: normal;
+    }
+
+    button:hover:not(:disabled) {
+      background: linear-gradient(180deg, #735d3f 0, #f2a813 52%, #b8740d 100%);
+      color: #23170b;
+      border-color: #130d07;
+      box-shadow:
+        0 1px 0 #ffd36f inset,
+        0 -1px 0 #6b3d07 inset,
+        0 0 12px #f6a40066,
+        0 8px 18px #0009;
+    }
+
+    button:active:not(:disabled) {
+      transform: translateY(1px);
+      box-shadow: 0 1px 4px #000 inset;
+    }
+
+    button:disabled {
+      opacity: .55;
+      cursor: wait;
+    }
+
+    .icon-button {
+      width: 44px;
+      height: 44px;
+      padding: 0;
+      display: grid;
+      place-items: center;
+      font-size: 1.1rem;
+      font-weight: 900;
+    }
+
+    .loader-box {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      margin-top: 1rem;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid #100f0d;
+      background: linear-gradient(180deg, rgba(66, 59, 52, .96), rgba(37, 33, 29, .98));
+      color: #d5c2a7;
+      box-shadow:
+        0 1px 0 #7b6f60 inset,
+        0 -1px 0 #111 inset,
+        0 8px 20px #0008;
+    }
+
+    .loader-spinner {
+      width: 22px;
+      height: 22px;
+      border: 3px solid #5b5148;
+      border-top-color: #f6b31d;
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+      flex: 0 0 auto;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .result {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 12px;
+      border: 1px solid #100f0d;
+      background: linear-gradient(180deg, rgba(66, 59, 52, .96), rgba(37, 33, 29, .98));
+      color: #ead9c0;
+      box-shadow:
+        0 1px 0 #7b6f60 inset,
+        0 -1px 0 #111 inset,
+        0 8px 20px #0008;
+      text-shadow: 0 1px 0 #000;
+    }
+
+    .ok {
+      background: linear-gradient(180deg, #31533b 0, #1e3326 100%);
+      color: #a8ffc9;
+      border-color: #172a1f;
+      box-shadow:
+        0 1px 0 #5f8f6f inset,
+        0 -1px 0 #0d160f inset,
+        0 8px 20px #0008;
+    }
+
+    .warn {
+      background: linear-gradient(180deg, #665026 0, #3c2c14 100%);
+      color: #ffe0a0;
+      border-color: #1d1407;
+      box-shadow:
+        0 1px 0 #a8843a inset,
+        0 -1px 0 #191006 inset,
+        0 8px 20px #0008;
+    }
+
+    #wordListContainer {
+      margin-top: 2rem;
+      display: none;
+    }
+
+    h3 {
+      color: #f6b31d;
+      letter-spacing: .45px;
+      text-shadow: 0 1px 0 #000, 0 0 10px #f4a00077;
+    }
+
+    #wordList {
+      max-height: 300px;
+      overflow-y: auto;
+      padding: 1rem;
+      background: linear-gradient(180deg, rgba(31, 29, 26, .98), rgba(18, 17, 15, .98));
+      border: 1px solid #100f0d;
+      border-radius: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      box-shadow:
+        0 1px 0 #5d5348 inset,
+        0 1px 0 #000,
+        inset 0 0 28px #0009;
+    }
+
+    .badge {
+      background: linear-gradient(180deg, #5b5148 0, #3a342f 48%, #1f1c19 100%);
+      border: 1px solid #11100f;
+      color: #f1dfc4;
+      padding: 7px 11px;
+      border-radius: 999px;
+      font-size: .9rem;
+      box-shadow:
+        0 1px 0 #8a7b69 inset,
+        0 -1px 0 #0d0c0b inset,
+        0 1px 0 #000;
+      text-shadow: 0 1px 0 #000;
+    }
+
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: #0009;
+      backdrop-filter: blur(6px);
+      z-index: 20;
+      padding: 18px;
+    }
+
+    .modal-backdrop.show {
+      display: grid;
+      place-items: center;
+    }
+
+    .modal {
+      width: min(520px, 100%);
+      border: 1px solid #100f0d;
+      border-radius: 16px;
+      background: linear-gradient(180deg, #4b433b 0, #2d2925 48%, #171513 100%);
+      color: #ead9c0;
+      box-shadow:
+        0 1px 0 #7b6c5b inset,
+        0 -1px 0 #0a0908 inset,
+        0 22px 60px #000b;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 18px;
+      border-bottom: 1px solid #0d0c0b;
+      background: linear-gradient(180deg, #5b5148 0, #3a342f 48%, #1f1c19 100%);
+      box-shadow: 0 1px 0 #8a7b69 inset;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      color: #f6b31d;
+      font-size: 1.1rem;
+      text-shadow: 0 1px 0 #000, 0 0 10px #f4a00077;
+    }
+
+    .modal-body {
+      padding: 18px;
+      line-height: 1.6;
+      color: #d5c2a7;
+    }
+
+    .modal-body strong {
+      color: #f6b31d;
+    }
+
+    .modal-body a {
+      color: #f6b31d;
+      text-decoration-color: #f6b31d88;
+    }
+
+    .modal-body a:hover {
+      color: #ffd36f;
+    }
+
+    .modal-body .contact {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: linear-gradient(180deg, #1f1d1a, #12110f);
+      border: 1px solid #0d0c0b;
+      color: #ead9c0;
+      box-shadow: 0 1px 0 #5d5348 inset, 0 1px 0 #000;
+    }
+
+    .close-button {
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      display: grid;
+      place-items: center;
+      font-size: 1.25rem;
+    }
+
+    @media (max-width: 560px) {
+      header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .header-actions {
+        width: 100%;
+        justify-content: flex-end;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>
+      <svg class="logo-icon" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" aria-label="Logo">
+        <g fill="currentColor">
+          <path fill-rule="evenodd" d="M477 247a305 305 0 1 0 0 610a305 305 0 1 0 0-610zm0 93a212 212 0 1 1 0 424a212 212 0 1 1 0-424z"/>
+          <polygon points="724,424 862,552 724,680 668,599 606,599 606,495 668,496"/>
+          <rect x="410" y="495" width="264" height="104" rx="52"/>
+          <circle cx="802" cy="204" r="37"/>
+          <circle cx="683" cy="260" r="26"/>
+          <circle cx="786" cy="286" r="25"/>
+        </g>
+      </svg>
+      <span>Facer Trademark Checker</span>
+    </h1>
+
+    <div class="header-actions">
+      <button class="icon-button" onclick="openInfo()" title="About this page">?</button>
+      <button id="listButton" class="icon-button" onclick="toggleList()" title="Show trademark word list">📄</button>
+    </div>
+  </header>
+
+  <main>
+    <p>Paste your description below:</p>
+
+    <textarea id="inputText" placeholder="e.g. Inspired by Rolex, Seiko, and others..."></textarea>
+
+    <button onclick="checkTrademarks()">Check for trademarks</button>
+
+    <div id="loader" class="loader-box">
+      <div class="loader-spinner"></div>
+      <span>Loading trademark word list...</span>
+    </div>
+
+    <div id="result" class="result"></div>
+
+    <div id="wordListContainer">
+      <h3>Trademark word list</h3>
+      <div id="wordList"></div>
+    </div>
+  </main>
+
+  <div id="infoModal" class="modal-backdrop" onclick="closeInfo(event)">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
+      <div class="modal-header">
+        <h2 id="infoTitle">About this checker</h2>
+        <button class="close-button" onclick="closeInfo()" title="Close">×</button>
+      </div>
+
+      <div class="modal-body">
+        <p>
+          This page helps you check a Facer watch face description for words that may be trademarked.
+          It compares your text with a word list loaded from Google Sheets.
+        </p>
+
+        <p>
+          The checker is only a helpful tool and does not replace your own review.
+          Always make sure your final description follows Facer guidelines.
+        </p>
+
+        <div class="contact">
+  Questions or suggestions? Contact me on Facer:
+  <a href="https://www.facer.io/u/Jives" target="_blank" rel="noopener noreferrer"><strong>Jives</strong></a>
+</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQdhyTC2yiHRDg9NEhk22h0CG82nRO8osF6JsR1KSVWzlLGNHLKBJOw1jIEmu5IkabEV1O8IobLL5ey/pub?output=csv";
+    let cachedWords = [];
+    let isLoading = false;
+
+    async function fetchWords() {
+      const response = await fetch(CSV_URL);
+      const csv = await response.text();
+      cachedWords = csv.split(/\r?\n/).map(t => t.trim().toLowerCase()).filter(t => t);
+      cachedWords.sort();
+    }
+
+    function showLoader() {
+      document.getElementById("loader").style.display = "flex";
+      document.getElementById("listButton").disabled = true;
+    }
+
+    function hideLoader() {
+      document.getElementById("loader").style.display = "none";
+      document.getElementById("listButton").disabled = false;
+    }
+
+    function openInfo() {
+      document.getElementById("infoModal").classList.add("show");
+    }
+
+    function closeInfo(event) {
+      if (!event || event.target.id === "infoModal" || event.target.classList.contains("close-button")) {
+        document.getElementById("infoModal").classList.remove("show");
+      }
+    }
+
+    document.addEventListener("keydown", function(event) {
+      if (event.key === "Escape") {
+        document.getElementById("infoModal").classList.remove("show");
+      }
+    });
+
+    async function checkTrademarks() {
+      const input = document.getElementById("inputText").value.toLowerCase();
+      const resultBox = document.getElementById("result");
+
+      resultBox.innerHTML = "Checking...";
+      resultBox.className = "result";
+
+      try {
+        if (cachedWords.length === 0) {
+          showLoader();
+          await fetchWords();
+          hideLoader();
+        }
+
+        const words = input.split(/[^a-zA-Z0-9\-]+/);
+        const matched = cachedWords.filter(t => words.includes(t));
+
+        if (matched.length > 0) {
+          resultBox.classList.add("warn");
+          resultBox.innerHTML = `⚠️ <strong>Warning:</strong> Potential trademarked terms found:<br><em>${matched.join(", ")}</em>`;
+        } else {
+          resultBox.classList.add("ok");
+          resultBox.innerHTML = "✅ No known trademark issues found.";
+        }
+      } catch (err) {
+        hideLoader();
+        resultBox.innerHTML = "❌ Error loading trademark list.";
+        console.error(err);
+      }
+    }
+
+    async function toggleList() {
+      if (isLoading) return;
+
+      const container = document.getElementById("wordListContainer");
+      const list = document.getElementById("wordList");
+
+      if (container.style.display === "none" || container.style.display === "") {
+        try {
+          isLoading = true;
+          showLoader();
+
+          if (cachedWords.length === 0) {
+            await fetchWords();
+          }
+
+          list.innerHTML = "";
+
+          cachedWords.forEach(word => {
+            const span = document.createElement("span");
+            span.className = "badge";
+            span.textContent = word;
+            list.appendChild(span);
+          });
+
+          container.style.display = "block";
+        } catch (err) {
+          alert("Error loading trademark list.");
+          console.error(err);
+        } finally {
+          isLoading = false;
+          hideLoader();
+        }
+      } else {
+        container.style.display = "none";
+      }
+    }
+  </script>
+</body>
+</html>
